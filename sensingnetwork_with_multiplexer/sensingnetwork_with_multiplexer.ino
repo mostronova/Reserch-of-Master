@@ -7,7 +7,11 @@
 #include <MKRWAN.h>
 #include <Wire.h>
 #include <AHT20.h>
-AHT20 aht20;
+#define ADDRESS 0x70  //1110000→16進数に
+#include <stdint.h>
+AHT20 aht20_0; //あ
+AHT20 aht20_1; //い
+AHT20 aht20_2; //う
 
 LoRaModem modem;
 
@@ -19,6 +23,9 @@ String appKey= "ABCDC2475232327162444532217441FF";
 String devAddr= "a8610a30323e8411";
 String nwkSKey;
 String appSKey;
+
+uint8_t channel_code(uint8_t ch);
+void switch_channel(uint8_t ch);
 
 void setup() {
   // put your setup code here, to run once:
@@ -89,44 +96,156 @@ void setup() {
 //センサの初期化
   Wire.begin(); //Join I2C bus
   //Check if the AHT20 will acknowledge
-  if (aht20.begin() == false)
+  switch_channel(0); //channelを0にした
+  if(aht20_0.begin() == false)
   {
-    Serial.println("AHT20 not detected. Please check wiring. Freezing.");
-    while (1);
-  }
+    Serial.println("あ not detected. Please check wiring. Freezing.");
+  }  
+
+  switch_channel(1); //channelを1にした
+  if(aht20_1.begin() == false)
+  {
+    Serial.println("い not detected. Please check wiring. Freezing.");
+  }  
+
+  switch_channel(2); //channelを2にした
+  if(aht20_2.begin() == false)
+  {
+    Serial.println("う not detected. Please check wiring. Freezing.");
+  }  
 
 }
 
 void loop() {
 
-  if (aht20.available() == true)
+  switch_channel(0);
+  if (aht20_0.available() == true)
   {
     //Get the new temperature and humidity value
-    float temperature = aht20.getTemperature();
-    float humidity = aht20.getHumidity();
+    float temperature = aht20_0.getTemperature();
+    float humidity = aht20_0.getHumidity();
 
-  int err;
-  modem.setPort(3);
-  modem.beginPacket();
-  modem.print(String(temperature)+","+String(humidity));
-  err = modem.endPacket(true);
-  if (err > 0) {
-  //  Serial.println("Message sent correctly!");
-  } else {
-    Serial.println("Error sending message :(");
+    int err;
+    modem.setPort(3);
+    modem.beginPacket();
+    modem.print("ch0,"+String(temperature)+","+String(humidity));
+    err = modem.endPacket(true);
+    if (err > 0) {
+    //  Serial.println("Message sent correctly!");
+    } else {
+      Serial.println("Error sending message :(");
+    }
+
+    //Print the results
+    Serial.print("あ,");
+    //Serial.print("Temperature: ");
+    Serial.print(temperature, 2);
+    Serial.print(",");
+    //Serial.print(" ℃\t");
+    //Serial.print("Humidity: ");
+    Serial.print(humidity, 2);
+    //Serial.print("% RH");
+
+    Serial.println();
+
+    delay(1000);
   }
 
-  //Print the results
-  //Serial.print("Temperature: ");
-  Serial.print(temperature, 2);
-  Serial.print(",");
-  //Serial.print(" ℃\t");
-  //Serial.print("Humidity: ");
-  Serial.print(humidity, 2);
-  //Serial.print("% RH");
+  switch_channel(1);
+  if (aht20_1.available() == true)
+  {
+    //Get the new temperature and humidity value
+    float temperature = aht20_1.getTemperature();
+    float humidity = aht20_1.getHumidity();
 
-  Serial.println();
+    int err;
+    modem.setPort(3);
+    modem.beginPacket();
+    modem.print("ch1,"+String(temperature)+","+String(humidity));
+    err = modem.endPacket(true);
+    if (err > 0) {
+    //  Serial.println("Message sent correctly!");
+    } else {
+      Serial.println("Error sending message :(");
+    }
+
+    //Print the results
+    Serial.print("い,");
+    //Serial.print("Temperature: ");
+    Serial.print(temperature, 2);
+    Serial.print(",");
+    //Serial.print(" ℃\t");
+    //Serial.print("Humidity: ");
+    Serial.print(humidity, 2);
+    //Serial.print("% RH");
+
+    Serial.println();
+
+    delay(1000);
   }
 
-  delay(3000);
+  switch_channel(2);
+  if (aht20_2.available() == true)
+  {
+    //Get the new temperature and humidity value
+    float temperature = aht20_2.getTemperature();
+    float humidity = aht20_2.getHumidity();
+
+    int err;
+    modem.setPort(3);
+    modem.beginPacket();
+    modem.print("ch2,"+String(temperature)+","+String(humidity));
+    err = modem.endPacket(true);
+    if (err > 0) {
+    //  Serial.println("Message sent correctly!");
+    } else {
+      Serial.println("Error sending message :(");
+    }
+
+    //Print the results
+    Serial.print("う,");
+    //Serial.print("Temperature: ");
+    Serial.print(temperature, 2);
+    Serial.print(",");
+    //Serial.print(" ℃\t");
+    //Serial.print("Humidity: ");
+    Serial.print(humidity, 2);
+    //Serial.print("% RH");
+
+    Serial.println();
+
+    delay(1000);
+  }
+
+ delay(1000);
 }
+
+//channel選択のためにregisterに書き込む内容を作る!! //
+uint8_t channel_code(uint8_t ch)
+{
+  uint8_t nana;
+  nana  = ch & 7;  //and➡&
+
+  uint8_t hachi;
+  hachi = nana | 8;  //or➡|
+
+  return hachi;
+}
+
+//channel変える関数 //アドレスにchannel_codeを送る
+void switch_channel(uint8_t ch)
+{
+  uint8_t nextnana;
+  nextnana = channel_code(ch);
+
+  Wire.beginTransmission(ADDRESS);
+  Wire.write (nextnana);
+  Wire.endTransmission();
+}
+
+
+
+
+
+
+
