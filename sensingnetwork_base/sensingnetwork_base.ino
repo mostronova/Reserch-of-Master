@@ -49,10 +49,10 @@ void setup() {
   int connected;
   if (mode == 1) {
     Serial.println("Enter your APP EUI");
-    appEui = "3574817514217441";
+    appEui = "";
 
     Serial.println("Enter your APP KEY");
-    appKey = "ABCDC2475232327162444532217441FF";
+    appKey = "";
 
     appKey.trim();
     appEui.trim();
