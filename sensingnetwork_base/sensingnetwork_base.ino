@@ -14,9 +14,9 @@ LoRaModem modem;
 // Uncomment if using the Murata chip as a module
 // LoRaModem modem(Serial1);
 
-String appEui= "3574817514217441";
-String appKey= "ABCDC2475232327162444532217441FF";
-String devAddr= "a8610a30323e8411";
+String appEui= "";
+String appKey= "";
+String devAddr= "";
 String nwkSKey;
 String appSKey;
 
